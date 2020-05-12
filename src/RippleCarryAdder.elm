@@ -17,9 +17,10 @@ inverter a =
 halfAdder a b =
     let
         d = orGate a b
-
-        e = andGate a b
-            |> inverter
+            
+        e =
+            andGate a b
+                |> inverter
 
         sumDigit = 
             andGate d e
@@ -84,11 +85,9 @@ rippleCarryAdder a b carryIn =
 numberFromDigits digitsList =
     List.foldl (\digit number -> digit + 10 * number) 0 digitsList
 
-extractDigits number = 
-    String.fromInt number
-        |> String.padLeft 4 '0' 
-        |> String.split ""
-        |> List.map stringToInt
+extractDigits number =     
+    digits number
+        |> padZeros 4
         |> Array.fromList
         |> arrayToRecord
 
@@ -111,7 +110,7 @@ arrayToRecord array =
                 |> Maybe.withDefault -1
 
         fourthElement =
-            Array.get 3 array
+            Array.get 3 array                
                 |> Maybe.withDefault -1
 
     in
@@ -122,7 +121,20 @@ arrayToRecord array =
     }
 
 digits number =
-    if number == 0 then []
+    let
+        getDigits n =
+            if n == 0 then
+                []
 
-    else
-        digits (number // 10) ++ [ remainderBy 10 number ]
+            else
+                remainderBy 10 n :: getDigits ( n // 10 )
+    in
+        getDigits number
+            |> List.reverse
+
+padZeros total list =
+    let
+        numberOfZeros =
+            total - List.length list
+    in
+    List.repeat numberOfZeros 0 ++ list            
